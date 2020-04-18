@@ -84,12 +84,12 @@ function init()
   softcut.event_phase(update_positions)
   softcut.poll_start_phase()
 
-  position = 0
-  counter = metro.init()
-  counter.time = 0.5
-  counter.count = -1
-  counter.event = count
-  counter:start()
+  -- position = 0
+  -- counter = metro.init()
+  -- counter.time = 0.5
+  -- counter.count = -1
+  -- counter.event = count
+  -- counter:start()
 
   grid_init()
   redraw()
@@ -129,34 +129,60 @@ function clock_init()
   counter:start()
 end
 
-function count(c)
+-- function count(c)
+--   position = position + 1
+--   print(position)
+--   blink()
+--   g:refresh()
+-- end
+
+-- function blink()
+  -- if position % 2 == 0 then
+  --   g:led(1, 1, 15)
+  --   -- g:refresh()
+  -- else
+  --   g:led(1, 1, 4)
+  --   -- g:refresh()
+  -- end
+-- end
+
+function count()
   position = position + 1
-  print(position)
   blink()
   g:refresh()
 end
-
-function blink()
-  if position % 2 == 0 then
-    g:led(1, 1, 15)
-    -- g:refresh()
-  else
-    g:led(1, 1, 4)
-    -- g:refresh()
-  end
-end
-
 
 g.key = function(x,y,z)
   if (x == 1 and y == 8 and z == 1) then
     g:led(1, 8, 15)
     rec_arm = true
-  end
-  if rec_arm then
-    if (x == 1 and (y>=1 or y<=6) and z == 1) then
-      print("on")
-      blink()
-    end
+  elseif rec_arm then
+    range = (y > 0 and y < 7)
+      if (x == 1 and range and z == 1) then
+        print("yes")
+        clock_init()
+        -- print(y)
+        function blink()
+          -- print(y)
+
+            if position % 2 == 0 and range then
+              g:led(1, y, 4)
+              -- g:refresh()
+            elseif position % 2 ~= 0 and range then
+              g:led(1, y, 15)
+              -- g:refresh()
+            -- else
+            --   g:led(1, y, 0)
+            end
+        end
+      elseif y > 6 then
+        print("nothing")
+      end
+        -- function count()
+        --   position = position + 1
+        --   blink()
+        --   g:refresh()
+        -- end
   end
   g:refresh()
 end
