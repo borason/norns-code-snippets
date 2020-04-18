@@ -1,6 +1,18 @@
 -- variables
 local recording = false
 local current_position = 0
+local record_arm = false
+
+-- grid init
+local g = grid.connect()
+local g = grid.connect()
+function grid_init()
+  g:led(1, 8, 4)
+  for i=1,6 do
+    g:led(1, i, 4)
+  end
+  g:refresh()
+end
 
 local function reset_loop()
   softcut.buffer_clear(1)
@@ -58,7 +70,6 @@ function init()
   softcut.rate_slew_time(1, 0.1)
   softcut.loop_start(1, 0)
   softcut.loop_end(1, 350)
-  -- softcut.loop(1, 1)
   softcut.fade_time(1, 0.1)
   softcut.rec(1, 0)
   softcut.rec_level(1, 1)
@@ -67,10 +78,20 @@ function init()
   softcut.buffer(1, 1)
   softcut.enable(1, 1)
   softcut.filter_dry(1, 1)
+
   -- softcut phase poll
   softcut.phase_quant(1, .01)
   softcut.event_phase(update_positions)
   softcut.poll_start_phase()
+
+  position = 0
+  counter = metro.init()
+  counter.time = 0.5
+  counter.count = -1
+  counter.event = count
+  counter:start()
+
+  grid_init()
   redraw()
 end
 
@@ -97,6 +118,54 @@ function enc(n, d)
   end
   redraw()
 end
+
+function clock_init()
+  -- initiate clock
+  position = 0
+  counter = metro.init()
+  counter.time = 0.5
+  counter.count = -1
+  counter.event = count
+  counter:start()
+end
+
+function count(c)
+  position = position + 1
+  print(position)
+  blink()
+  g:refresh()
+end
+
+function blink()
+  if position % 2 == 0 then
+    g:led(1, 1, 15)
+    -- g:refresh()
+  else
+    g:led(1, 1, 4)
+    -- g:refresh()
+  end
+end
+
+
+g.key = function(x,y,z)
+  if (x == 1 and y == 8 and z == 1) then
+    g:led(1, 8, 15)
+    rec_arm = true
+  end
+  if rec_arm then
+    if (x == 1 and (y>=1 or y<=6) and z == 1) then
+      print("on")
+      blink()
+    end
+  end
+  g:refresh()
+end
+
+-- function grid_redraw()
+--   -- g:led(15, 1, 15)
+--   -- grid_init()
+--   g:refresh()
+-- end
 
 -- parameters
 -- sample start controls
